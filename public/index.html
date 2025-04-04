@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>VideoLlamada SESIS</title>
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>		
+		<!-- Bootstrap CSS -->
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+		<!-- Font Awesome CSS -->
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">	
+		<link rel="stylesheet" href="css/style.css">
+
+		<style>
+			/* Mostrar el ícono de menú solo en pantallas pequeñas */
+			@media (max-width: 768px) {
+				.menu-icon {
+					display: block; /* Mostrar el ícono de menú en pantallas pequeñas */
+				}
+			}
+
+			/* Ocultar el ícono de menú en pantallas grandes (como laptops y escritorios) */
+			@media (min-width: 769px) {
+				.menu-icon {
+					display: none; /* Ocultar el ícono de menú en pantallas grandes */
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<!-- Cabecera fija -->
+		<header class="header">
+			<div class="d-flex align-items-center">
+				<i class="fa fa-bars menu-icon" id="menuToggle"></i>
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" height="50">
+					<!-- Contorno de la laptop con bordes más suaves -->
+					<rect x="5" y="15" width="90" height="90" rx="10" ry="10" fill="#333" />
+
+					<!-- Sección azul (izquierda) con menor altura y margen visible -->
+					<rect x="10" y="20" width="35" height="40" rx="10" ry="10" fill="#4a90e2" />
+
+					<!-- Sección verde (derecha) con menor altura y margen visible -->
+					<rect x="55" y="20" width="35" height="40" rx="10" ry="10" fill="#7ed321" />
+
+					<!-- Base de la laptop con bordes suaves -->
+					<rect x="10" y="70" width="80" height="5" rx="2" ry="2" fill="#333" />
+
+					<!-- Sombra sutil debajo de la laptop -->
+					<rect x="10" y="75" width="80" height="3" rx="2" ry="2" fill="rgba(0, 0, 0, 0.2)" />
+				</svg>
+					
+				<!-- <img src="logo2.png" alt="Descripción de la imagen" height="50"> -->
+			</div>
+	
+			<div class="search-bar">
+				<table>
+					<tr>
+						<td>Canal <select id="roomSelect"> </select> </td>					
+						<td> <button id="connectButton">OFF</button> </td>							
+					</tr>
+				</table>
+			</div>
+
+			<nav>
+				<svg class="phone-icon" id="notificationBell" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 51.2 51.2" width="51.2" height="51.2">
+				  <!-- Círculo exterior rojo con borde blanco (reducido un 20%) -->
+				  <circle cx="25.6" cy="25.6" r="22.4" fill="red" stroke="white" stroke-width="1.6"/>
+				  
+				  <!-- Campana estilizada (reducida un 20%) -->
+				  <path d="M25.6 16c-4.418 0-8 3.582-8 8v5.6h16v-5.6c0-4.418-3.582-8-8-8z" fill="white"/>
+				  
+				  <!-- Badajo de la campana (reducido un 20%) -->
+				  <circle cx="25.6" cy="33.6" r="3.2" fill="white"/>
+				</svg>
+
+				<div class="call-alert" id="missedCalls">
+					<ul>
+						<!-- <li><strong>Llamada perdida:</strong> Juan Pérez | 15:30</li> -->
+						<!-- <li><strong>Llamada perdida:</strong> María García | 14:20</li> -->
+						<!-- <li><strong>Llamada perdida:</strong> Luis Martínez | 13:50</li> -->
+					</ul>
+				</div>	
+				
+				<img id="logoutButton" src="images/cerrar_sesion.png" alt="Descripción de la imagen" width="50" height="50">
+			</nav>
+		</header>
+	
+<!---------------------------------------------------------------------------------------------------------------------------->
+		<!-- Columna izquierda -->
+		<aside class="left-column" id="sideMenu">
+			<div class="users-list">				
+				<h5 style="color:white;">Usuarios en línea</h5>
+				<ul id="users" class="nav flex-column">
+					<!-- Usuarios conectados -->
+				</ul>
+			</div>
+		</aside>
+
+<!---------------------------------------------------------------------------------------------------------------------------->
+		<!-- Contenedor central -->
+		<main class="content">
+			<div class="video-info"  class="incoming-call" style="background-color:transparent;">
+				<span class="cabecera" >Bienvenido:</span> 
+				<input type="text" class="cabecera extra"  id="usernameInput" placeholder="Tu nombre" disabled> 
+				<input type="hidden" class="cabecera" id="descripcionInput" placeholder="" >
+				<input type='text' id='id_user' name='id_user'>
+				<input type="text" id="id_userTarget" value=""> 
+				<span id="callDate"></span> | <span id="callTime"></span> | <span id="callDuration">En línea: 00:00</span>
+			</div>
+				
+			
+			<div class="video-info"  class="incoming-call" style="background-color:transparent; width: 100%; height: calc(100% - 50px);">
+					<div class="containerVR">
+						<video id="remoteVideo" autoplay ></video>
+						
+						<div class="containerVL">
+							<video id="localVideo" autoplay muted></video>						
+						</div>
+					</div>
+					<br>
+					<button id="endCall" class="end-call" disabled>Finalizar Llamada</button>
+
+					<!---------------------------------------------------------------------------------------------------------------------------->
+					
+					<!-- Llamada entrante -->
+					<div id="incomingCall" class="incoming-call">
+						<h3 style="color:white; font-size:25px;">Llamada entrante de:</h3>
+						<span id="incomingText" style="color:black; font-size:30px;">...</span> <br>
+						<button id="acceptCall" class="btn btn-success">Aceptar</button>
+						<button id="rejectCall" class="btn btn-danger">Rechazar</button>
+					</div>
+					<!-- Tono de llamada -->
+					<audio id="ringtone" src="ringtone.mp3" loop></audio>
+					<!---------------------------------------------------------------------------------------------------------------------------->
+
+					<!-- Llamada Saliente -->
+					<div id="outgoingCall"  class="incoming-call">
+						<h3 style="color:white; font-size:25px;">Llamando a:</h3> 
+						<span id="outgoingText" style="color:black; font-size:30px;"><strong>...</strong></span> <br>
+						<button id="cancelCallButton" class="btn btn-danger">Cancelar Llamada</button>
+					</div>
+					<!-- Tono de llamada saliente -->
+					<audio id="outgoingRingtone" src="outgoing-ringtone.mp3" loop></audio>
+					<!---------------------------------------------------------------------------------------------------------------------------->
+
+					<!-- Error en VideoLlamada -->
+					<div id="ErrorInCall"  class="incoming-call-error">
+						<h3>Error: <strong><span id="ErrorInCallText" style="color:white; font-size:18px;">...</span></strong> </h3>
+						<button id="errorCallButton">Cerrar</button>
+					</div>
+			</div>
+		</main>
+<!---------------------------------------------------------------------------------------------------------------------------->
+
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+		<script src="/socket.io/socket.io.js"></script>		
+		<script>
+			const menuToggle = document.getElementById('menuToggle');
+			const sideMenu = document.getElementById('sideMenu');
+
+			menuToggle.addEventListener('click', () => {
+				sideMenu.classList.toggle('show');
+			});
+
+			const missedCallsAlert = document.getElementById('missedCallsAlert');
+			const missedCalls = document.getElementById('missedCalls');
+			const phoneIcon = document.querySelector('.phone-icon');
+
+			phoneIcon.addEventListener('click', () => {
+				missedCalls.style.display = (missedCalls.style.display === 'none' || missedCalls.style.display === '') ? 'block' : 'none';
+				changeBellColor(false);	
+			});
+
+			function changeBellColor(hasMissedCalls) {
+				const bell = document.getElementById('notificationBell');
+				if (hasMissedCalls) {
+					bell.querySelector('circle').setAttribute('fill', 'red'); // Fondo rojo
+					bell.querySelector('circle').setAttribute('stroke', 'white'); // Borde blanco
+					bell.querySelectorAll('path').forEach(path => path.setAttribute('fill', 'white')); // Campana blanca
+				} else {
+					bell.querySelector('circle').setAttribute('fill', '#34495e'); // Fondo claro
+					bell.querySelector('circle').setAttribute('stroke', '#bbb'); // Borde gris
+					bell.querySelectorAll('path').forEach(path => path.setAttribute('fill', '#888')); // Campana gris
+				}
+			}
+			<!-- // Cambiar a gris cuando no haya llamadas perdidas -->
+			changeBellColor(false);
+		</script>
+
+		<script>
+			function obtenerHoraExacta() {
+				const ahora = new Date();
+				const horas = ahora.getHours().toString().padStart(2, '0');
+				const minutos = ahora.getMinutes().toString().padStart(2, '0');
+				const segundos = ahora.getSeconds().toString().padStart(2, '0');
+
+				return `${horas}:${minutos}:${segundos}`;
+			}
+					
+			$(document).ready(function () {
+				// Solicitar información del usuario al backend
+				$.ajax({
+					url: '/user-info',
+					method: 'GET',
+					success: function (response) {
+						// Mostrar el nombre del usuario		
+						var id_user = document.getElementById('id_user');						
+						var input = document.getElementById('usernameInput');
+						var descripcion = document.getElementById('descripcionInput');
+						id_user.value = response.id_user;
+						input.value = response.username;
+						descripcion.value = response.descripcion+' id:'+response.id_user;
+ 
+						// Poblar el <select> con datos del segundo JSON (additionalInfo)
+						const selectElement = $('#roomSelect');
+						if (Array.isArray(response.additionalInfo)) {
+						
+							response.additionalInfo.forEach(option => {
+								// Crear una opción por cada elemento del arreglo
+								const optionElement = $('<option></option>')
+								.val(option.value) // Asignar el valor al atributo "value"
+								.text(option.label); // Usar la etiqueta como texto visible
+								selectElement.append(optionElement); // Agregar al <select>
+							});
+						} else {
+							// Si no es un arreglo, mostrar un mensaje de error
+							selectElement.append('<option>Error: Información adicional no válida</option>');
+						}
+					},
+					error: function () {
+						alert('Error al obtener la información del usuario. Por favor, inicia sesión nuevamente.');
+						window.location.href = '/'; 
+					}
+				});
+			});
+
+			document.getElementById('logoutButton').addEventListener('click', () => {
+				fetch('/logout', {
+					method: 'POST',
+					credentials: 'include' // Incluye cookies en la solicitud
+				})
+				.then(response => {
+					if (response.ok) {
+						alert('Sesión cerrada con éxito');
+						window.location.href = '/'; // Redirige a la página principal
+					} else {
+						alert('Error al cerrar sesión');
+					}
+				})
+				.catch(error => console.error('Error:', error));
+			});
+
+
+//--------------------------------------------------------------------------------------------------------
+//---------------------  Si el usuario es válido, inicializar WebRTC -------------------------------------
+//--------------------------------------------------------------------------------------------------------
+
+			const socket = io();
+			// <!-- const socket = io('https://localhost:3000'); -->
+
+			const localVideo = document.getElementById('localVideo');
+			const remoteVideo = document.getElementById('remoteVideo');
+			const usersList = document.getElementById('users');
+			const endCallButton = document.getElementById('endCall');
+			const ringtone = document.getElementById('ringtone');
+			
+			const id_user = document.getElementById('id_user');
+			const usernameInput = document.getElementById('usernameInput');
+			const roomSelect = document.getElementById('roomSelect');
+			
+			const incomingCallContainer = document.getElementById('incomingCall');
+			const acceptCallButton = document.getElementById('acceptCall');
+			const rejectCallButton = document.getElementById('rejectCall');
+			const incomingText = document.getElementById('incomingText');
+
+			const outgoingCallContainer = document.getElementById('outgoingCall');
+			const cancelCallButton = document.getElementById('cancelCallButton');
+			const outgoingRingtone = document.getElementById('outgoingRingtone');
+			
+			const ErrorInCall = document.getElementById('ErrorInCall');
+			const errorCallButton = document.getElementById('errorCallButton'); 
+			
+			var call_miss_sw=0; //variable para entrar o no a funcion llamada perdida
+			
+			let localStream;
+			let peerConnection;
+			let targetUserId;
+			let incomingOffer;
+			let inCall = false;
+			let TimeMissCall=5000; //20 segundos
+			var username;
+			var descripcion;			
+
+			const usersState = {};
+			const ringtoneOutgoing = new Audio('outgoing-ringtone.mp3');			
+			const config = {
+				iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+			};
+
+
+
+			// Obtener el video local
+			navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+				.then(stream => {
+					localStream = stream;
+					localVideo.srcObject = stream;
+				})
+				.catch(error => console.error('Error accediendo a la cámara:', error));
+				
+
+
+
+			// Función para enviar el nombre de usuario y sala al servidor
+			function registerUser() 
+			{
+				username = usernameInput.value.trim();
+				descripcion = descripcionInput.value.trim();
+				const id_user = document.getElementById('id_user').value;
+				const roomName = roomSelect.value;
+
+				if (username === '') {
+					alert('Por favor, ingrese un nombre de usuario.');
+					return;
+				}
+
+				// Emitir el nombre de usuario y la sala seleccionada al servidor
+				socket.emit('register', { id_user, username, descripcion, roomName });
+				
+				console.log('Id_user:'+ id_user +' Username:'+username+' descripcion:'+descripcion+' roomName:'+roomName);
+				
+				// cambiamos de color 
+				document.getElementById('connectButton').style.backgroundColor = "#10bd18";
+				document.getElementById('connectButton').textContent ="ON";
+			}
+			document.getElementById('connectButton').addEventListener('click', registerUser);
+			
+
+
+			async function createPeerConnection() 
+			{
+				peerConnection = new RTCPeerConnection(config);
+				localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+				peerConnection.onicecandidate = event => {
+					if (event.candidate) {
+						socket.emit('signal', {
+							target: targetUserId,
+							candidate: event.candidate
+						});
+					}
+				};
+				peerConnection.ontrack = event => {
+					remoteVideo.srcObject = event.streams[0];
+									outgoingRingtone.pause();
+				};
+			}
+
+
+
+			// Llamada entrante 
+			socket.on('signal', async data => 
+			{
+				if (data.offer) {
+					//Acá cuando el usuario objetivo ve que entra una llamada
+					incomingText.textContent = `${data.sender}`;
+					incomingCallContainer.style.display = 'block';
+					ringtone.play();
+
+					incomingOffer = data.offer;
+					targetUserId = data.sender;
+					id_userOrigin = data.id_userOrigin;
+
+					console.log("Llamada 000");
+					
+					// Inicia el temporizador para colgar si no se responde en 10 segundos
+					callTimer = setTimeout(() => {
+						console.log("Llamada perdida, tiempo excedido");
+
+						socket.emit('miss-call-user', { id_userOrigin: id_userOrigin, nameUser:targetUserId, busy: false });
+						cancelCall()
+
+					}, TimeMissCall);
+				
+				} 
+				else if (data.answer) { 
+					await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+					enableEndCall();						
+					outgoingCallContainer.style.display = 'none';  //  Dejar invisible div de llamando cuando el usuario objetivo acepta la llamada -->
+					activateLocalvideo();
+					console.log("Llamada 002");
+				} 
+				else if (data.candidate) {
+					//Acá cuando el emisor ve que la llamada es aceptada
+					//Acá la llamada del cliente hacia el usuario objetivo despues de aceptar la llamada
+					await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+					console.log("Llamada 001");
+				}
+			});
+	
+
+
+
+			// Lista de usuarios actualizada cuando hay cambios en la sala
+			socket.on('users', users => {
+				usersList.innerHTML = '';
+				// Primero, recorrer los usuarios actuales para actualizar los existentes y agregar nuevos
+				users.forEach(user => {
+					if (user.username !== username) {
+						let userElement = document.getElementById(`user-${user.username}`);
+						// Si el usuario no está en la lista, creamos un nuevo elemento
+						if (!userElement) {
+							const li = document.createElement('li');
+							li.id = `user-${user.username}`;
+
+							li.innerHTML = `
+								<div class="divContent" id="user-div-${user.username}">
+									<span class="spanName" id="Name-call-${user.username}" title="call-${user.id_user}" >${user.username}</span>
+									<button value="${user.id_user}" id="call-${user.username}" ${usersState[user.username]?.busy ? 'disabled' : ''}  class="${usersState[user.username]?.busy ? 'busy' : ''}"  onclick="callUser('${user.id_user}','${user.username}')"> ${usersState[user.username]?.busy ? 'Ocupado' : 'Llamar'} </button>
+								</div>
+								<span class="spanDesc">${user.description}</span>
+							`;
+							usersList.appendChild(li);  // Añadimos el nuevo usuario
+						} else {
+							// Si el usuario ya existe, actualizamos su descripción
+							const descElement = userElement.querySelector('.spanDesc');
+							if (descElement) {
+								descElement.textContent = user.description;  // Actualizamos la descripción
+							}
+						}
+					}
+				});
+			});
+
+
+
+
+			socket.on('user-busy', ({ userId, busy }) => {
+				usersState[userId] = { busy };
+				// Si es nuestro propio usuario y se rechaza la llamada, aseguramos que inCall sea falso -->
+				if (userId === username && !busy) {
+					inCall = false;
+					outgoingCallContainer.style.display = 'none';
+					outgoingRingtone.pause();
+					outgoingRingtone.currentTime = 0;		
+
+					incomingCallContainer.style.display = 'none';
+					ringtone.pause();		
+					ringtone.currentTime = 0;						
+				}				
+				updateUserState(userId, busy);
+				
+				clearTimeout(callTimer);
+			});
+			
+
+
+
+			socket.on('call-canceled', () => {
+				// Aquí cuando el usuario que recibe la llamada es cancelada por el usuario que llama
+				incomingCallContainer.style.display = 'none';	
+				ringtone.pause();
+				ringtone.currentTime = 0;
+
+				// Restablecer el estado local --> 
+				inCall = false;
+				updateUserState(username, false);
+				socket.emit('user-busy', { userId: username, busy: false });
+			});
+			
+
+
+			// Escuchar el evento 'error' desde el servidor
+			socket.on('error', data => {
+				if (data && data.message) {
+					console.error('Error recibido del servidor:', data.message);
+					// Mostrar el mensaje de error al usuario
+					cancelCall();
+					
+					ErrorInCallText.textContent = data.message+' Sala:'+data.room;
+					ErrorInCall.style.display = 'block';
+					
+					//solicita actualizar la sala -->
+					socket.emit('update_room', { roomName: data.room });
+
+				} else {
+					console.error('Se recibió un error sin detalles.');
+				}
+			});			
+				
+
+
+			// Escuchar el evento 'error' desde el servidor
+			socket.on('miss-call-user', data => {
+					// -------------------------------------------------------------
+						//enviando notificación al usuario destino
+						//ahora activa el icono de notificacion en barra superior derecha
+						changeBellColor(true);	
+						
+						HoraCallMissed=obtenerHoraExacta();
+
+						//Ahora se agrega el elemento <li> a la lista de llamadas perdidas
+						// Primero obtenemos el elemento de la lista (ul o ol) donde quieres agregar el <li>
+						let lista = document.getElementById("missedCalls"); // Asegúrate de que el id coincida con el de tu lista
+
+						// Creamos el nuevo elemento <li>
+						let nuevoElemento = document.createElement("li");
+
+						// Opcional: puedes agregar texto o contenido al <li>
+						//user_miss=document.getElementById('incomingText').innerText;
+						nuevoElemento.textContent = "Missed call: "+data.nameUser+" "+HoraCallMissed;
+
+						// Finalmente, lo agregamos a la lista
+						lista.appendChild(nuevoElemento);
+					// -------------------------------------------------------------
+				alert(data.id_userOrigin);
+			});			
+				
+				
+				
+			//Usuario inicia intento de llamada a usuario destino
+			async function callUser(id_userTarget, userId) {
+				if (inCall) return;	
+				targetUserId = userId;
+				inCall = true;
+				updateUserState(username, true);
+				socket.emit('user-busy', { userId: username, busy: true });
+				
+				//obtener el id del objetivo
+				document.getElementById("id_userTarget").value=id_userTarget;
+				let id_userOrigin=document.getElementById("id_user").value;
+
+				outgoingText.textContent = ` ${userId} ...`;
+				outgoingCallContainer.style.display = 'block';
+				outgoingRingtone.play();
+
+				await createPeerConnection();
+				const offer = await peerConnection.createOffer();
+				await peerConnection.setLocalDescription(offer);
+				socket.emit('signal', { target: userId, offer, id_userOrigin:id_userOrigin });
+
+				//id_username="user-div-miss-"+targetUserId;
+				//let liUser = document.getElementById(id_username);
+				//if (liUser) {
+				//	liUser.style.display = "none";
+				//}
+			}
+			
+			
+			// Aquí cuando el usuario objetivo acepta la llamada 
+			async function acceptCall() {
+				if (incomingOffer) {
+					await createPeerConnection();
+					await peerConnection.setRemoteDescription(new RTCSessionDescription(incomingOffer));
+					const answer = await peerConnection.createAnswer();
+					await peerConnection.setLocalDescription(answer);
+					socket.emit('signal', { target: targetUserId, answer });
+
+					incomingCallContainer.style.display = 'none';
+					ringtone.pause();
+					ringtone.currentTime = 0;
+					enableEndCall();					
+					
+					// Actualiza el estado a ocupado para el usuario que acepta la llamada
+					inCall = true;
+					
+					updateUserState(username, true);
+					socket.emit('user-busy', { userId: username, busy: true }); // Notifica al servidor que el usuario acepto la llamada y está ocupado
+				}
+			}
+
+ 
+
+			// Función para rechazar la llamada
+			function rejectCall() {
+				incomingCallContainer.style.display = 'none';
+				ringtone.pause();
+				ringtone.currentTime = 0;
+
+				// Emitir evento de rechazo de llamada al servidor
+				socket.emit('call-rejected', targetUserId);
+
+				// Restablecer el estado de llamada para ambos usuarios
+				inCall = false;
+				updateUserState(username, false);
+				socket.emit('user-busy', { userId: username, busy: false });
+			}
+			
+			
+			
+			function HiddenErrorCall()
+			{
+			    // Aquí cuando el usuario destino no es encontrado  -->
+				ErrorInCall.style.display = 'none';
+
+				// solicitar actualización de lista usuarios de la sala
+				socket.emit('room-update', targetUserId);
+			}
+			errorCallButton.addEventListener('click', HiddenErrorCall);
+			
+			
+			
+			function endCall() {
+				if (peerConnection) {
+					peerConnection.close();
+					peerConnection = null;
+					remoteVideo.srcObject = null;
+					inCall = false;
+					updateUserState(username, false);
+					socket.emit('user-busy', { userId: username, busy: false });
+					
+					// Emitir evento para finalizar la llamada y actualizar estado de ambos usuarios
+					socket.emit('end-call', { userId: username, targetUserId });	
+					
+					disableEndCall();
+				}
+			}
+			
+
+			function updateUserState(userId, isBusy) {
+				const button = document.getElementById(`call-${userId}`);
+				if (button) {
+					button.disabled = isBusy;
+					button.textContent = isBusy ? 'Ocupado' : 'Llamar';
+					button.classList.toggle('busy', isBusy);
+				}
+			}
+			
+
+			// Aquí cuando el usuario que llama cancela la llamada  -->
+			function cancelCall() {
+				outgoingCallContainer.style.display = 'none';
+				outgoingRingtone.pause();
+				outgoingRingtone.currentTime = 0;
+
+				// Notificar al servidor que la llamada ha sido cancelada -->
+				socket.emit('cancel-call', targetUserId);
+
+				// Restablecer el estado local -->
+				inCall = false;
+				updateUserState(username, false);
+				socket.emit('user-busy', { userId: username, busy: false });
+				
+				//let id_userOrigin = document.getElementById("id_user").value;
+				//socket.emit('miss-call-user', { id_userOrigin: id_userOrigin, busy: false });
+			}
+			cancelCallButton.addEventListener('click', cancelCall);
+
+
+			function initiateCall(targetUserId) {
+				if (inCall) return;
+
+				inCall = true;
+				socket.emit('initiate-call', targetUserId);
+				updateUserState(targetUserId, true);
+			}
+
+
+
+			function enableEndCall() {
+				endCallButton.disabled = false;
+				endCallButton.addEventListener('click', endCall);
+			}
+
+
+
+			function disableEndCall() {
+				endCallButton.disabled = true;
+				endCallButton.removeEventListener('click', endCall);
+			}
+			socket.emit('new-user', { id: username });
+
+
+			acceptCallButton.addEventListener('click', acceptCall);
+			rejectCallButton.addEventListener('click', rejectCall);
+
+
+//<!-- --------------------------------------------------------------------------------- -->
+//<!--------- COMIENZAN FUNCIONES DE GRABACION -->
+//<!-- --------------------------------------------------------------------------------- -->
+			let mediaRecorder;
+			let recordedChunks = [];
+
+			// Función para iniciar la grabación de la videollamada -->
+			function startRecording() {
+				// Crear un MediaRecorder y empezar a grabar el stream de video --> 
+				mediaRecorder = new MediaRecorder(localStream, { mimeType: 'video/webm; codecs=vp9' });
+				mediaRecorder.ondataavailable = event => {
+					if (event.data.size > 0) {
+						recordedChunks.push(event.data);
+					}
+				};
+
+				mediaRecorder.onstop = saveRecording;
+
+				mediaRecorder.start();
+				console.log('Grabación iniciada');
+			}
+
+
+			// Función para detener la grabación --> 
+			function stopRecording() {
+				if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+					mediaRecorder.stop();
+					console.log('Grabación detenida');
+				}
+			}
+
+
+
+//<!-- --------------------------------------------------------------------------------- -->
+//<!---------- // Función para guardar la grabación en una carpeta con el nombre del archivo en el formato requerido -->
+//<!-- --------------------------------------------------------------------------------- -->
+			function saveRecording() {
+				const blob = new Blob(recordedChunks, { type: 'video/webm' });
+				recordedChunks = [];
+
+				// Crear la carpeta y el nombre de archivo con identificación, fecha, hora y usuarios -->
+				const folderName = `grabaciones`;
+				const username = usernameInput.value;
+				const roomName = roomSelect.value;
+				const date = new Date().toISOString().slice(0, 10);
+				const time = new Date().toLocaleTimeString().replace(/:/g, '-');
+				const fileName = `${folderName}/${roomName}_${username}_${date}_${time}.webm`;
+
+				// Guardar el archivo de video en la carpeta -->
+				const a = document.createElement('a');
+				a.href = URL.createObjectURL(blob);
+				a.download = fileName;
+				a.click();
+				console.log(`Grabación guardada como ${fileName}`);
+			}
+
+			// Llamar a startRecording cuando comienza la llamada -->
+			// document.getElementById('connectButton').addEventListener('click', startRecording);
+
+			// Llamar a stopRecording cuando termina la llamada -->
+			// document.getElementById('endCall').addEventListener('click', stopRecording);
+
+
+
+//<!-- --------------------------------------------------------------------------------- -->
+//<!--------- // VISUALIZAR FECHA Y HORA LLAMADA -->
+//<!-- --------------------------------------------------------------------------------- -->
+
+			let callStartTime;
+
+			// Función para formatear la duración de la llamada -->
+			function formatDuration(seconds) {
+				const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
+				const remainingSeconds = (seconds % 60).toString().padStart(2, '0');
+				return `${minutes}:${remainingSeconds}`;
+			}
+
+			// Función para iniciar la llamada y registrar el inicio --> 
+			function startCallTimer() {
+				callStartTime = new Date();
+				document.getElementById('callDate').textContent = `Fecha: ${callStartTime.toLocaleDateString()}`;
+				document.getElementById('callTime').textContent = `Hora: ${callStartTime.toLocaleTimeString()}`;
+				updateCallDuration();
+			}
+
+			// Función para actualizar la duración de la llamada cada segundo -->
+			function updateCallDuration() {
+				if (!callStartTime) return;
+
+				const elapsedTime = Math.floor((new Date() - callStartTime) / 1000);
+				document.getElementById('callDuration').textContent = `En línea: ${formatDuration(elapsedTime)}`;
+				setTimeout(updateCallDuration, 1000); <!-- // Actualiza cada segundo -->
+			}
+
+			// Inicia la duración de la llamada cuando comienza la conexión --> 
+			document.getElementById('connectButton').addEventListener('click', startCallTimer);
+
+			// Detener la actualización cuando se finaliza la llamada --> 
+			document.getElementById('endCall').addEventListener('click', () => {
+				callStartTime = null; <!-- // Detiene el temporizador -->
+			});	
+		</script>
+	</body>
+</html>
+
