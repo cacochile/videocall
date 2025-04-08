@@ -49,7 +49,7 @@
 		{
 			// Solicitud al archivo PHP para obtener dos JSON en la misma respuesta
 			const response = await axios.get(
-			`http://localhost/videop2p/validateUser.php?user=${user}&password=${password}`
+			`http://sesis.cl/videop2p/validateUser.php?user=${user}&password=${password}`
 			);
 
 			const data = response.data; // JSON recibido
@@ -357,7 +357,7 @@
 								io.to(roomName).emit('user-busy', { userId: targetUserId, busy: false });
 								let userCall=users[socket.id].id_user;
 								mov='Fin de llamada entre '+userId+' y '+targetUserId;
-								axios.get(`http://localhost/videop2p/insertMov.php?id_user=${userCall}&mov=${mov}`);	
+								axios.get(`http://sesis.cl/videop2p/insertMov.php?id_user=${userCall}&mov=${mov}`);	
 							}
 						});
 						
@@ -391,7 +391,7 @@
 								console.log(`3.1.- Usuario desconectado: ${username} de la sala ${room}`);
 								
 								mov=(`Salida sistema: Usuario ${username} desconectado de la sala ${room}`);
-								axios.get(`http://localhost/videop2p/insertMov.php?id_user=${id_user}&mov=${mov}`);
+								axios.get(`http://sesis.cl/videop2p/insertMov.php?id_user=${id_user}&mov=${mov}`);
 								
 								// Emitir la lista actualizada de usuarios en la sala
 								const usersInRoom = Object.values(users)
