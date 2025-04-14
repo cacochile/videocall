@@ -1,3 +1,4 @@
+	require('dotenv').config();
 
 	// Importar módulos necesarios
 	const express = require('express');
@@ -48,9 +49,10 @@
 		try 
 		{
 			// Solicitud al archivo PHP para obtener dos JSON en la misma respuesta
-			const response = await axios.get(
-			`http://sesis.cl/videop2p/validateUser.php?user=${user}&password=${password}`
-			);
+			// const response = await axios.get(`http://localhost/videop2p/validateUser.php?user=${user}&password=${password}`);
+			const response = await axios.get(`${process.env.BASE_URL}/validateUser.php?user=${user}&password=${password}`);
+
+
 
 			const data = response.data; // JSON recibido
 			const data1 = data.validation; // Primer JSON (validación del usuario)
@@ -66,7 +68,7 @@
 
 				id_user = data1.id_user;
 				mov='Ingreso a sistema';
-				axios.get(`http://localhost/videop2p/insertMov.php?id_user=${id_user}&mov=${mov}`);
+				axios.get(`${process.env.BASE_URL}/insertMov.php?id_user=${id_user}&mov=${mov}`);
 
 				// Redirigir a la página principal
 				res.redirect("/index.html");
@@ -130,6 +132,7 @@
 	});
 
 
+
 // --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
 
@@ -176,8 +179,10 @@
 					});
 
 
+
 				// -------------------- NUEVO USUARIO ----------------------------------------------
 				// ---------------------------------------------------------------------------------
+
 
 				// Manejar nuevas conexiones de usuarios
 				io.on('connection', socket => {					
@@ -229,7 +234,7 @@
 							io.to(roomName).emit('users', usersInRoom);	
 
 							mov='ingreso a sala id:'+roomName;
-							axios.get(`http://localhost/videop2p/insertMov.php?id_user=${id_user}&mov=${mov}`);	
+							axios.get(`${process.env.BASE_URL}/insertMov.php?id_user=${id_user}&mov=${mov}`);	
 						});
 
 
@@ -300,7 +305,6 @@
 
 
 
-
 						// Manejar cambios en el estado de ocupado/libre de los usuarios en la misma sala
 						socket.on('user-busy', ({ userId, busy }) => {
 							const roomName = users[socket.id]?.room;
@@ -357,7 +361,7 @@
 								io.to(roomName).emit('user-busy', { userId: targetUserId, busy: false });
 								let userCall=users[socket.id].id_user;
 								mov='Fin de llamada entre '+userId+' y '+targetUserId;
-								axios.get(`http://sesis.cl/videop2p/insertMov.php?id_user=${userCall}&mov=${mov}`);	
+								axios.get(`${process.env.BASE_URL}/insertMov.php?id_user=${userCall}&mov=${mov}`);	
 							}
 						});
 						
@@ -378,6 +382,7 @@
 						});
 						
 						
+						
 						// Cuando un usuario se desconecta
 						socket.on('disconnect', () => {
 							console.log(`3.- Usuario desconectado: ${socket.id}`);
@@ -391,7 +396,7 @@
 								console.log(`3.1.- Usuario desconectado: ${username} de la sala ${room}`);
 								
 								mov=(`Salida sistema: Usuario ${username} desconectado de la sala ${room}`);
-								axios.get(`http://sesis.cl/videop2p/insertMov.php?id_user=${id_user}&mov=${mov}`);
+								axios.get(`${process.env.BASE_URL}/insertMov.php?id_user=${id_user}&mov=${mov}`);
 								
 								// Emitir la lista actualizada de usuarios en la sala
 								const usersInRoom = Object.values(users)
@@ -426,7 +431,7 @@
 	
 
 	// Iniciar el servidor en el puerto 3000
-	const PORT = process.env.PORT || 3000;
+	const PORT = process.env.PORT || 5000;
 	server.listen(PORT, () => {
 		console.log(`Servidor escuchando en http://localhost:${PORT}`);
 	});
