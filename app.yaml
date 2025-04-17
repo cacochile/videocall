@@ -1,0 +1,24 @@
+runtime: nodejs18 # Especifica la versión del entorno de ejecución de Node.js que deseas usar
+
+instance_class: F1 # Clase de instancia. F1 es la más pequeña y entra dentro de la capa gratuita (revisa los límites actuales)
+
+env: standard # Opcional: Puedes especificar 'standard' o 'flexible' (flexible es más común con Dockerfiles o configuraciones personalizadas)
+             # Si no lo especificas, por defecto suele ser 'flexible' con un Dockerfile implícito si no lo proporcionas.
+             # Para un control más directo, y si no usas Dockerfile, especificar 'nodejs' como runtime implica un entorno flexible gestionado.
+
+handlers:
+- url: /.*
+  script: auto
+
+# Opcional: Define variables de entorno que tu aplicación necesite
+env_variables:
+  NODE_ENV: production
+  # API_KEY: "tu_clave_api_secreta"
+  # DATABASE_URL: "tu_url_de_base_de_datos"
+
+# Opcional: Configuración para el manejo de archivos estáticos (si los tienes en un directorio llamado 'public')
+# static_dir: public
+
+# Opcional: Configuración para el manejo de errores personalizados
+# error_handlers:
+#   404: /not_found.html
