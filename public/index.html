@@ -76,9 +76,6 @@
 
 				<div class="call-alert" id="missedCalls">
 					<ul>
-						<!-- <li><strong>Llamada perdida:</strong> Juan Pérez | 15:30</li> -->
-						<!-- <li><strong>Llamada perdida:</strong> María García | 14:20</li> -->
-						<!-- <li><strong>Llamada perdida:</strong> Luis Martínez | 13:50</li> -->
 					</ul>
 				</div>	
 				
@@ -92,7 +89,6 @@
 			<div class="users-list">				
 				<h5 style="color:white;">Usuarios en línea</h5>
 				<ul id="users" class="nav flex-column">
-					<!-- Usuarios conectados -->
 				</ul>
 			</div>
 		</aside>
@@ -104,8 +100,10 @@
 				<span class="cabecera" >Bienvenido:</span> 
 				<input type="text" class="cabecera extra"  id="usernameInput" placeholder="Tu nombre" disabled> 
 				<input type="hidden" class="cabecera" id="descripcionInput" placeholder="" >
-				<input type='text' id='id_user' name='id_user'>
-				<input type="text" id="id_userTarget" value=""> 
+				
+				<input type='hidden' id='id_user' name='id_user'> 
+				<input type="hidden" id="id_userTarget" value=""> 
+				
 				<span id="callDate"></span> | <span id="callTime"></span> | <span id="callDuration">En línea: 00:00</span>
 			</div>
 				
@@ -126,7 +124,7 @@
 					<!-- Llamada entrante -->
 					<div id="incomingCall" class="incoming-call">
 						<h3 style="color:white; font-size:25px;">Llamada entrante de:</h3>
-						<span id="incomingText" style="color:black; font-size:30px;">...</span> <br>
+						<span id="incomingText" style="color:white; font-size:30px;">...</span> <br>
 						<button id="acceptCall" class="btn btn-success">Aceptar</button>
 						<button id="rejectCall" class="btn btn-danger">Rechazar</button>
 					</div>
@@ -137,7 +135,7 @@
 					<!-- Llamada Saliente -->
 					<div id="outgoingCall"  class="incoming-call">
 						<h3 style="color:white; font-size:25px;">Llamando a:</h3> 
-						<span id="outgoingText" style="color:black; font-size:30px;"><strong>...</strong></span> <br>
+						<span id="outgoingText" style="color:white; font-size:30px;"><strong>...</strong></span> <br>
 						<button id="cancelCallButton" class="btn btn-danger">Cancelar Llamada</button>
 					</div>
 					<!-- Tono de llamada saliente -->
@@ -257,7 +255,6 @@
 //--------------------------------------------------------------------------------------------------------
 
 			const socket = io();
-			// <!-- const socket = io('https://localhost:3000'); -->
 
 			const localVideo = document.getElementById('localVideo');
 			const remoteVideo = document.getElementById('remoteVideo');
@@ -281,23 +278,35 @@
 			const ErrorInCall = document.getElementById('ErrorInCall');
 			const errorCallButton = document.getElementById('errorCallButton'); 
 			
-			var call_miss_sw=0; //variable para entrar o no a funcion llamada perdida
+			var call_miss_sw=0; 
 			
 			let localStream;
 			let peerConnection;
 			let targetUserId;
 			let incomingOffer;
 			let inCall = false;
-			let TimeMissCall=5000; //20 segundos
+			let TimeMissCall=10000; 
 			var username;
 			var descripcion;			
 
 			const usersState = {};
 			const ringtoneOutgoing = new Audio('outgoing-ringtone.mp3');			
-			const config = {
-				iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-			};
+			//const config = {
+			//	iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+			//};
 
+			const config = {
+			  iceServers: [
+				{ 
+					urls: 'stun:stun.l.google.com:19302'
+				}, 
+				{
+				  urls: 'turn:relay1.expressturn.com:3478', 
+				  username: 'efJL69TMQ2ZU65HSDC',
+				  credential: 'u9bEx0RdvEfA5pDq'
+				}
+			  ]
+			};
 
 
 			// Obtener el video local
@@ -512,7 +521,7 @@
 						// Finalmente, lo agregamos a la lista
 						lista.appendChild(nuevoElemento);
 					// -------------------------------------------------------------
-				alert(data.id_userOrigin);
+				//alert(data.id_userOrigin);
 			});			
 				
 				
@@ -546,7 +555,7 @@
 			}
 			
 			
-			// Aquí cuando el usuario objetivo acepta la llamada 
+			// Aqui cuando el usuario objetivo acepta la llamada 
 			async function acceptCall() {
 				if (incomingOffer) {
 					await createPeerConnection();
